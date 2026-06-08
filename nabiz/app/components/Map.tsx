@@ -148,7 +148,7 @@ function useStaticMap(mapRef: React.RefObject<HTMLDivElement | null>, onProvince
         // Orb — tüm iller, renk sonradan güncellenir
         const orb = svg.append('circle')
           .attr('cx', c[0]).attr('cy', c[1]).attr('r', r)
-          .attr('fill', 'url(#grad_bekleyen)')
+          .attr('fill', 'url(#grad_nötr)')
           .attr('filter', isBig ? 'url(#bigGlow)' : 'url(#oGlow)')
           .attr('data-orb', k)
           .style('pointer-events', 'none')
