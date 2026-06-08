@@ -327,6 +327,11 @@ export default function Map({ results, event, onVoted, onlineCount }: any) {
         }, () => resolve())
       })
     }
+
+    if (!selectedProvince) {
+      alert('Lütfen haritadan bir il seçiniz 📍')
+      return
+    }
     const res = await fetch('/api/vote', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
