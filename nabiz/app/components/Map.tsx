@@ -397,7 +397,7 @@ export default function Map({ results, event, onVoted, onlineCount }: any) {
               {sorted.map(e => {
                 const pct = total > 0 ? Math.round((byEmotion[e] || 0) / total * 100) : 0
                 return (
-                  <div key={e} style={{ flex: 1, padding: '6px 4px', textAlign: 'center', borderRadius: 10, background: 'transparent' }}>
+                  <div key={e} style={{ flex: 1, padding: '6px 4px', textAlign: 'center', borderRadius: 10, background: '#0e1520', borderRadius: 10, border: '.5px solid #1a2535' }}>
                     <div style={{ fontSize: 8, color: COLORS[e], fontWeight: 600, textTransform: 'capitalize', marginBottom: 2 }}>{e}</div>
                     <div style={{ fontSize: 11, fontWeight: 700, color: COLORS[e] }}>{pct}%</div>
                   </div>
