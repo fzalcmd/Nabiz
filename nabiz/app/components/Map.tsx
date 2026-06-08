@@ -389,19 +389,23 @@ export default function Map({ results, event, onVoted, onlineCount }: any) {
 
 
 
-      {/* EMOTION BAR */}
-      <div style={{ display: 'flex', margin: '6px 14px 10px', background: '#0e1520', borderRadius: 12, overflow: 'hidden', border: '.5px solid #1a2535' }}>
-        {EMOTIONS.map(e => {
-          const pct = total > 0 ? Math.round((byEmotion[e] || 0) / total * 100) : 0
+        {/* EMOTION BAR */}
+        {(() => {
+          const sorted = [...EMOTIONS].sort((a, b) => (byEmotion[b] || 0) - (byEmotion[a] || 0)).slice(0, 5)
           return (
-            <div key={e} style={{ flex: 1, padding: '7px 2px', textAlign: 'center', borderRight: '.5px solid #1a2535' }}>
-              <div style={{ width: 22, height: 22, background: COLORS[e] + '22', border: `.5px solid ${COLORS[e]}44`, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 2px', fontSize: 12 }}>{EICO[e]}</div>
-              <div style={{ fontSize: 7.5, color: '#667' }}>{e}</div>
-              <div style={{ fontSize: 10, fontWeight: 700, color: COLORS[e] }}>%{pct}</div>
+            <div style={{ display: 'flex', margin: '6px 14px 10px', gap: 6 }}>
+              {sorted.map(e => {
+                const pct = total > 0 ? Math.round((byEmotion[e] || 0) / total * 100) : 0
+                return (
+                  <div key={e} style={{ flex: 1, padding: '6px 4px', textAlign: 'center', borderRadius: 10, border: `2px solid ${COLORS[e]}`, background: COLORS[e] + '18' }}>
+                    <div style={{ fontSize: 8, color: COLORS[e], fontWeight: 600, textTransform: 'capitalize', marginBottom: 2 }}>{e}</div>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: COLORS[e] }}>{pct}%</div>
+                  </div>
+                )
+              })}
             </div>
           )
-        })}
-      </div>
+        })()}
 
       {/* STATS 5 KART */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: 5, padding: '0 14px 6px' }}>
