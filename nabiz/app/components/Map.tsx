@@ -179,7 +179,8 @@ function useStaticMap(mapRef: React.RefObject<HTMLDivElement | null>, onProvince
 
 // ── KATMAN 2: Renk güncellemesi — haritayı yeniden çizmez ──
 function useColorUpdate(
-    orbsRef: React.RefObject<Record<string, SVGCircleElement>>,
+  orbsRef: React.RefObject<Record<string, SVGCircleElement>>,
+  pathsRef: React.RefObject<Record<string, SVGPathElement>>,
       byProvince: Record<string, any>
       ) {
         const ringsRef = useRef<Record<string, SVGCircleElement[]>>({})
@@ -203,7 +204,21 @@ function useColorUpdate(
                                                                                                     el.setAttribute('filter', `url(#${glowId})`)
                                                                                                           }
 
-                                                                                                                const oldRings = ringsRef.current[k] || []
+                                                                                                                // İl sınırı rengi
+      const pathEl = pathsRef.current?.[k]
+      if (pathEl) {
+        if (topEm) {
+          pathEl.setAttribute('stroke', COLORS[topEm])
+          pathEl.setAttribute('stroke-opacity', '0.8')
+          pathEl.setAttribute('stroke-width', totalVotes > 20 ? '1.2' : '0.7')
+        } else {
+          pathEl.setAttribute('stroke', '#00cfff')
+          pathEl.setAttribute('stroke-opacity', '0.5')
+          pathEl.setAttribute('stroke-width', '0.5')
+        }
+      }
+
+      const oldRings = ringsRef.current[k] || []
                                                                                                                       oldRings.forEach(r => r.remove())
                                                                                                                             ringsRef.current[k] = []
 
@@ -270,8 +285,8 @@ export default function Map({ results, event, onVoted, onlineCount }: any) {
     setShowShare(true)
   }, [])
 
-  const { orbsRef } = useStaticMap(mapRef, handleProvinceClick)
-  useColorUpdate(orbsRef, results?.byProvince || {})
+  const { orbsRef, pathsRef } = useStaticMap(mapRef, handleProvinceClick)
+  useColorUpdate(orbsRef, pathsRef, results?.byProvince || {})
 
   useEffect(() => {
     const t = setInterval(() => setSecs(s => s + 1), 1000)
