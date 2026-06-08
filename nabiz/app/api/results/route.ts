@@ -30,10 +30,17 @@ export async function GET() {
       byEmotion[v.emotion] = (byEmotion[v.emotion] || 0) + 1
     })
 
+    const topProvince = Object.entries(byProvince).sort((a, b) => {
+      const totalA = Object.values(a[1] as Record<string,number>).reduce((s,n)=>s+n,0)
+      const totalB = Object.values(b[1] as Record<string,number>).reduce((s,n)=>s+n,0)
+      return totalB - totalA
+    })[0]?.[0] || null
+
     return NextResponse.json({
       event,
       byProvince,
       byEmotion,
+      topProvince,
       total: votes?.length || 0
     })
   } catch (err: any) {
