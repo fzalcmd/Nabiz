@@ -395,10 +395,7 @@ export default function Map({ results, event, onVoted, onlineCount }: any) {
           const pct = total > 0 ? Math.round((byEmotion[e] || 0) / total * 100) : 0
           return (
             <div key={e} style={{ flex: 1, padding: '7px 2px', textAlign: 'center', borderRight: '.5px solid #1a2535' }}>
-              <div style={{ position: 'relative', width: 22, height: 22, background: COLORS[e] + '22', border: `.5px solid ${COLORS[e]}44`, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 2px', fontSize: 12 }}>
-                {EICO[e]}
-                <div style={{ position: 'absolute', top: -2, right: -2, width: 7, height: 7, borderRadius: '50%', background: COLORS[e], boxShadow: `0 0 4px ${COLORS[e]}` }} />
-              </div>
+              <div style={{ width: 22, height: 22, background: COLORS[e] + '22', border: `.5px solid ${COLORS[e]}44`, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 2px', fontSize: 12 }}>{EICO[e]}</div>
               <div style={{ fontSize: 7.5, color: '#667' }}>{e}</div>
               <div style={{ fontSize: 10, fontWeight: 700, color: COLORS[e] }}>%{pct}</div>
             </div>
