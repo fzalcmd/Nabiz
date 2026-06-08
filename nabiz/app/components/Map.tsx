@@ -296,6 +296,22 @@ export default function Map({ results, event, onVoted, onlineCount }: any) {
     setShowShare(true)
   }, [])
 
+  useEffect(() => {
+    if (!navigator.geolocation) return
+    navigator.geolocation.getCurrentPosition(async (pos) => {
+      try {
+        const { latitude, longitude } = pos.coords
+        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&accept-language=tr`)
+        const data = await res.json()
+        const province = data.address?.province || data.address?.state || data.address?.city
+        if (province) {
+          const clean = province.replace(' İli', '').replace(' Province', '').trim()
+          setSelectedProvince(clean)
+        }
+      } catch {}
+    }, () => {})
+  }, [])
+
   const { orbsRef, pathsRef } = useStaticMap(mapRef, handleProvinceClick)
   useColorUpdate(orbsRef, pathsRef, results?.byProvince || {})
 
