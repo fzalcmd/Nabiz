@@ -181,8 +181,8 @@ function useStaticMap(mapRef: React.RefObject<HTMLDivElement | null>, onProvince
 function useColorUpdate(
   orbsRef: React.RefObject<Record<string, SVGCircleElement>>,
   pathsRef: React.RefObject<Record<string, SVGPathElement>>,
-      byProvince: Record<string, any>
   byProvince: Record<string, any>,
+  selectedProvince?: string | null
   selectedProvince?: string | null
         const ringsRef = useRef<Record<string, SVGCircleElement[]>>({})
 
