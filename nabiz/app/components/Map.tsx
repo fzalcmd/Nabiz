@@ -309,33 +309,34 @@ export default function Map({ results, event, onVoted, onlineCount }: any) {
     if (!selectedEmotion || !event) return
 
     // Konum tespiti
-    if (!selectedProvince) {
-      await new Promise<void>((resolve) => {
-        if (!navigator.geolocation) { resolve(); return }
+    let detectedProvince = selectedProvince
+    if (!detectedProvince) {
+      detectedProvince = await new Promise<string | null>((resolve) => {
+        if (!navigator.geolocation) { resolve(null); return }
         navigator.geolocation.getCurrentPosition(async (pos) => {
           try {
             const { latitude, longitude } = pos.coords
             const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&accept-language=tr`)
             const data = await res.json()
-            const province = data.address?.province || data.address?.state || data.address?.city
-            if (province) {
-              const clean = province.replace(' İli', '').replace(' Province', '').trim()
+            const p = data.address?.province || data.address?.state || data.address?.city
+            if (p) {
+              const clean = p.replace(' İli', '').replace(' Province', '').trim()
               setSelectedProvince(clean)
-            }
-          } catch {}
-          resolve()
-        }, () => resolve())
+              resolve(clean)
+            } else resolve(null)
+          } catch { resolve(null) }
+        }, () => resolve(null))
       })
     }
 
-    if (!selectedProvince) {
+    if (!detectedProvince) {
       alert('Lütfen haritadan bir il seçiniz 📍')
       return
     }
     const res = await fetch('/api/vote', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ province: selectedProvince || province || 'Bilinmiyor', emotion: selectedEmotion, eventId: event.id })
+      body: JSON.stringify({ province: detectedProvince, emotion: selectedEmotion, eventId: event.id })
     })
     const data = await res.json()
     if (data.success) {
