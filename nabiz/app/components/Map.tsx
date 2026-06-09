@@ -247,7 +247,7 @@ function useColorUpdate(
                                                                                                                                                                                                                                             ring.setAttribute('opacity', '0')
                                                                                                                                                                                                                                                     ring.style.pointerEvents = 'none'
                                                                                                                                                                                                                                                             svg.appendChild(ring)
-                                                                                                                                                                                                                                                                    orbsRefRef.current[k] = [...(orbsRef.current[k] || []), ring]
+                                                                                                                                                                                                                                                                    orbsRef.current[k] = [...(orbsRef.current[k] || []), ring]
 
                                                                                                                                                                                                                                                                             const delay = i * 800
                                                                                                                                                                                                                                                                                     const maxR = r * (3 + i * 1.5)
@@ -285,6 +285,15 @@ export default function Map({ results, event, onVoted, onlineCount }: any) {
   const [filterIl, setFilterIl] = useState('Tümü')
   const [showFilter, setShowFilter] = useState(false)
 
+  const handleProvinceClick = useCallback((name: string) => {
+    setSelectedProvince(name)
+    setShowShare(true)
+  }, [])
+
+
+  const { orbsRef, pathsRef } = useStaticMap(mapRef, handleProvinceClick)
+  useColorUpdate(orbsRef, pathsRef, results?.byProvince || {})
+
   // Highlight effect - seçili il
   useEffect(() => {
     if (!pathsRef.current) return
@@ -306,15 +315,6 @@ export default function Map({ results, event, onVoted, onlineCount }: any) {
       }
     })
   }, [selectedProvince, pathsRef])
-
-  const handleProvinceClick = useCallback((name: string) => {
-    setSelectedProvince(name)
-    setShowShare(true)
-  }, [])
-
-
-  const { orbsRef, pathsRef } = useStaticMap(mapRef, handleProvinceClick)
-  useColorUpdate(orbsRef, pathsRef, results?.byProvince || {})
 
   useEffect(() => {
     const t = setInterval(() => setSecs(s => s + 1), 1000)
