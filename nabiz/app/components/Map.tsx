@@ -293,7 +293,7 @@ export default function Map({ results, event, onVoted, onlineCount }: any) {
 
 
   const { orbsRef, pathsRef } = useStaticMap(mapRef, handleProvinceClick)
-  useColorUpdate(orbsRef, pathsRef, results?.byProvince || {})
+  useColorUpdate(orbsRef, pathsRef, results?.byProvince || {}, selectedProvince)
 
   useEffect(() => {
     const t = setInterval(() => setSecs(s => s + 1), 1000)
