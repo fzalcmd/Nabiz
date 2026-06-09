@@ -38,7 +38,7 @@ function nn(s: string) {
 function useStaticMap(mapRef: React.RefObject<HTMLDivElement | null>, onProvinceClick: (name: string) => void) {
   const drawn = useRef(false)
   const pathsRef = useRef<Record<string, SVGPathElement>>({})
-  const orbsRef = useRef<Record<string, SVGCircleElement>>({})
+  const orbsRef = useRef<Record<string, SVGCircleElement[]>>({})
   const animActiveRef = useRef(true)
 
   useEffect(() => {
@@ -154,7 +154,8 @@ function useStaticMap(mapRef: React.RefObject<HTMLDivElement | null>, onProvince
           .attr('data-orb', k)
           .style('pointer-events', 'none')
 
-        orbsRef.current[k] = orb.node() as SVGCircleElement
+orbsRef.current[k] = [...(orbsRef.current[k] || []), orb.node() as SVGCircleElement]
+
 
         // Pulse — veri değişince useColorUpdate tetikler
         if (isBig) {
@@ -179,31 +180,30 @@ function useStaticMap(mapRef: React.RefObject<HTMLDivElement | null>, onProvince
 
 // ── KATMAN 2: Renk güncellemesi — haritayı yeniden çizmez ──
 function useColorUpdate(
-  orbsRef: React.RefObject<Record<string, SVGCircleElement>>,
+  orbsRef: React.RefObject<Record<string, SVGCircleElement[]>>,
   pathsRef: React.RefObject<Record<string, SVGPathElement>>,
   byProvince: Record<string, any>
 ) {
+  useEffect(() => {
 
-          useEffect(() => {
-              if (!orbsRef.current) return
+    Object.entries(orbsRef.current).forEach(([k, elements]) => {
 
-                  Object.entries(orbsRef.current).forEach(([k, el]) => {
-                        if (!el) return
-                              const provName = Object.keys(byProvince).find(n => nn(n) === k)
-                                    const byProv = provName ? (byProvince[provName] || {}) : {}
-                                          const totalVotes = (Object.values(byProv) as number[]).reduce((a, b) => a + b, 0)
-                                                const topEm = Object.keys(byProv).length > 0
-                                                        ? Object.keys(byProv).reduce((a, b) => byProv[a] > byProv[b] ? a : byProv[a] === byProv[b] ? (EMOTIONS.indexOf(a) <= EMOTIONS.indexOf(b) ? a : b) : b)
-                                                                : null
-                                                                      const color = topEm ? COLORS[topEm] : '#f4a261'
+      const provName = Object.keys(byProvince).find(n => n === k)
+      const byProv = provName ? (byProvince[provName] || {}) : {}
+      const totalVotes = (Object.values(byProv) as number[]).reduce((a, b) => a + b, 0)
+      const topEm = Object.keys(byProv).length > 0
+        ? Object.keys(byProv).reduce((a, b) => byProv[a] > byProv[b] ? a : byProv[a] === byProv[b] ? (EMOTIONS.indexOf(a) <= EMOTIONS.indexOf(b) ? a : b) : b)
+        : null
+      const color = topEm ? COLORS[topEm] : '#f4a261'
 
-                                                                            if (topEm) {
-                                                                                    el.setAttribute('fill', `url(#grad_${topEm})`)
-                                                                                            const glowId = totalVotes > 20 ? 'bigGlow' : totalVotes > 5 ? 'oGlow' : 'bGlow'
-                                                                                                    el.setAttribute('filter', `url(#${glowId})`)
-                                                                                                          }
+      elements.forEach((el) => {
+        if (topEm) {
+          if(topEm) el.setAttribute('fill', 'url(#grad_' + String(topEm) + ')')
+          const glowId = totalVotes > 20 ? 'bigGlow' : totalVotes > 5 ? 'oGlow' : 'bGlow'
+          if(glowId) el.setAttribute('filter', 'url(#' + String(glowId) + ')')
+        }
+      })
 
-                                                                                                                // İl içi ve sınır rengi
       const pathEl = pathsRef.current?.[k]
       if (pathEl) {
         if (topEm) {
@@ -221,59 +221,9 @@ function useColorUpdate(
           pathEl.setAttribute('stroke-width', '0.5')
         }
       }
-
-      const oldRings = orbsRef.current[k] || []
-                                                                                                                      oldRings.forEach(r => r.remove())
-                                                                                                                            orbsRef.current[k] = []
-
-                                                                                                                                  if (totalVotes === 0) return
-
-                                                                                                                                        const ringCount = totalVotes >= 50 ? 3 : totalVotes >= 10 ? 2 : 1
-                                                                                                                                              const svg = el.ownerSVGElement
-                                                                                                                                                    if (!svg) return
-
-                                                                                                                                                          const cx = parseFloat(el.getAttribute('cx') || '0')
-                                                                                                                                                                const cy = parseFloat(el.getAttribute('cy') || '0')
-                                                                                                                                                                      const r = parseFloat(el.getAttribute('r') || '3')
-
-                                                                                                                                                                            for (let i = 0; i < ringCount; i++) {
-                                                                                                                                                                                    const ring = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
-                                                                                                                                                                                            ring.setAttribute('cx', String(cx))
-                                                                                                                                                                                                    ring.setAttribute('cy', String(cy))
-                                                                                                                                                                                                            ring.setAttribute('r', String(r))
-                                                                                                                                                                                                                    ring.setAttribute('fill', 'none')
-                                                                                                                                                                                                                            ring.setAttribute('stroke', color)
-                                                                                                                                                                                                                                    ring.setAttribute('stroke-width', '0.8')
-                                                                                                                                                                                                                                            ring.setAttribute('opacity', '0')
-                                                                                                                                                                                                                                                    ring.style.pointerEvents = 'none'
-                                                                                                                                                                                                                                                            svg.appendChild(ring)
-                                                                                                                                                                                                                                                                    orbsRef.current[k] = [...(orbsRef.current[k] || []), ring]
-
-                                                                                                                                                                                                                                                                            const delay = i * 800
-                                                                                                                                                                                                                                                                                    const maxR = r * (3 + i * 1.5)
-
-                                                                                                                                                                                                                                                                                            ;(function(ringEl: SVGCircleElement, d: number, mR: number) {
-                                                                                                                                                                                                                                                                                                      let start: number | null = null
-                                                                                                                                                                                                                                                                                                                const duration = 2500
-                                                                                                                                                                                                                                                                                                                          function step(ts: number) {
-                                                                                                                                                                                                                                                                                                                                      if (!start) start = ts + d
-                                                                                                                                                                                                                                                                                                                                                  const elapsed = ts - start
-                                                                                                                                                                                                                                                                                                                                                              if (elapsed < 0) { requestAnimationFrame(step); return }
-                                                                                                                                                                                                                                                                                                                                                                          const progress = Math.min(elapsed / duration, 1)
-                                                                                                                                                                                                                                                                                                                                                                                      const eased = 1 - Math.pow(1 - progress, 3)
-                                                                                                                                                                                                                                                                                                                                                                                                  ringEl.setAttribute('r', String(r + (mR - r) * eased))
-                                                                                                                                                                                                                                                                                                                                                                                                              ringEl.setAttribute('opacity', String((1 - progress) * 0.6))
-                                                                                                                                                                                                                                                                                                                                                                                                                          if (progress < 1) { requestAnimationFrame(step) }
-                                                                                                                                                                                                                                                                                                                                                                                                                                      else { start = null; requestAnimationFrame(step) }
-                                                                                                                                                                                                                                                                                                                                                                                                                                                }
-                                                                                                                                                                                                                                                                                                                                                                                                                                                          requestAnimationFrame(step)
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                  })(ring, delay, maxR)
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                        }
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            })
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                              }, [byProvince])
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                              }
-
-
+    })
+  }, [pathsRef, orbsRef, byProvince])
+}
 export default function Map({ results, event, onVoted, onlineCount }: any) {
   const mapRef = useRef<HTMLDivElement>(null)
   const [showShare, setShowShare] = useState(false)
