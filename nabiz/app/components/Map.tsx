@@ -388,7 +388,7 @@ export default function Map({ results, event, onVoted, onlineCount }: any) {
           <div style={{ fontSize: 13, color: '#ff3b5c', fontWeight: 600 }}>{event?.title || 'Türkiye gündemi hareketli'}</div>
           <div style={{ fontSize: 11, color: '#556', marginTop: 2 }}>{event?.description || 'Toplumun nabzı anlık olarak ölçülüyor.'}</div>
         </div>
-        <div style={{ marginLeft: 'auto', fontSize: 10, color: '#445', whiteSpace: 'nowrap' }}>🕐 {liveTime}</div>
+        <div style={{ marginLeft: 'auto', fontSize: 10, color: '#888', whiteSpace: 'nowrap' }}>🕐 {liveTime}</div>
       </div>
 
       {/* MAP */}
@@ -437,7 +437,7 @@ export default function Map({ results, event, onVoted, onlineCount }: any) {
       {/* STATS 5 KART */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: 5, padding: '0 14px 6px' }}>
         <div style={{ background: '#0e1520', borderRadius: 10, padding: '8px 4px', textAlign: 'center', border: '.5px solid #1a2535' }}>
-          <div style={{ fontSize: 7, color: '#445', textTransform: 'uppercase', marginBottom: 2 }}>Katılım</div>
+          <div style={{ fontSize: 7, color: '#888', textTransform: 'uppercase', marginBottom: 2 }}>Katılım</div>
           <svg width="100%" height="12" viewBox="0 0 40 12">
             <polyline points="0,6 6,6 8,1 10,11 12,3 14,9 16,6 40,6" stroke="#57cc99" strokeWidth="1.2" fill="none" strokeLinecap="round" />
           </svg>
@@ -445,13 +445,13 @@ export default function Map({ results, event, onVoted, onlineCount }: any) {
           <div style={{ fontSize: 7, color: '#57cc99', marginTop: 1 }}>↑ son 10dk</div>
         </div>
         <div style={{ background: '#0e1520', borderRadius: 10, padding: '8px 4px', textAlign: 'center', border: '.5px solid #1a2535' }}>
-          <div style={{ fontSize: 7, color: '#445', textTransform: 'uppercase', marginBottom: 2 }}>Baskın</div>
+          <div style={{ fontSize: 7, color: '#888', textTransform: 'uppercase', marginBottom: 2 }}>Baskın</div>
           <div style={{ fontSize: 16, margin: '1px 0' }}>{EICO[topEmotion]}</div>
           <div style={{ fontSize: 8, fontWeight: 700, color: COLORS[topEmotion] }}>{topEmotion.slice(0, 6).toUpperCase()}</div>
           <div style={{ fontSize: 7, color: COLORS[topEmotion] }}>%{total > 0 ? Math.round((byEmotion[topEmotion] || 0) / total * 100) : 0}</div>
         </div>
         <div style={{ background: '#0e1520', borderRadius: 10, padding: '8px 4px', textAlign: 'center', border: '.5px solid #1a2535' }}>
-          <div style={{ fontSize: 7, color: '#445', textTransform: 'uppercase', marginBottom: 2 }}>En Aktif</div>
+          <div style={{ fontSize: 7, color: '#888', textTransform: 'uppercase', marginBottom: 2 }}>En Aktif</div>
           <svg width="100%" height="12" viewBox="0 0 40 12">
             <rect x="2" y="7" width="5" height="5" rx="1" fill="#ff3b5c" />
             <rect x="9" y="4" width="5" height="8" rx="1" fill="#ff3b5c" />
@@ -460,10 +460,10 @@ export default function Map({ results, event, onVoted, onlineCount }: any) {
             <rect x="30" y="7" width="5" height="5" rx="1" fill="#ff3b5c" opacity=".3" />
           </svg>
           <div style={{ fontSize: 8, fontWeight: 700, color: '#fff' }}>{ (results?.topProvince || 'YOK').toUpperCase()}</div>
-          <div style={{ fontSize: 7, color: '#445' }}>{ results?.topProvinceCount || 0} kişi</div>
+          <div style={{ fontSize: 7, color: '#888' }}>{ results?.topProvinceCount || 0} kişi</div>
         </div>
         <div style={{ background: '#0e1520', borderRadius: 10, padding: '8px 4px', textAlign: 'center', border: '.5px solid #1a2535' }}>
-          <div style={{ fontSize: 7, color: '#445', textTransform: 'uppercase', marginBottom: 2 }}>İl Sayısı</div>
+          <div style={{ fontSize: 7, color: '#888', textTransform: 'uppercase', marginBottom: 2 }}>İl Sayısı</div>
           <div style={{ position: 'relative', width: 30, height: 30, margin: '2px auto' }}>
             <svg width="30" height="30" viewBox="0 0 30 30">
               <circle cx="15" cy="15" r="12" fill="none" stroke="#1a2535" strokeWidth="2.5" />
@@ -471,15 +471,15 @@ export default function Map({ results, event, onVoted, onlineCount }: any) {
             </svg>
             <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 700 }}>81</div>
           </div>
-          <div style={{ fontSize: 7, color: '#445' }}>/81</div>
+          <div style={{ fontSize: 7, color: '#888' }}>/81</div>
         </div>
         <div style={{ background: '#0e1520', borderRadius: 10, padding: '8px 4px', textAlign: 'center', border: '.5px solid #1a2535' }}>
-          <div style={{ fontSize: 7, color: '#445', textTransform: 'uppercase', marginBottom: 2 }}>Toplam Oy</div>
+          <div style={{ fontSize: 7, color: '#888', textTransform: 'uppercase', marginBottom: 2 }}>Toplam Oy</div>
           <svg width="100%" height="12" viewBox="0 0 40 12">
             <polyline points="0,7 5,7 7,1 9,11 11,3 13,9 15,6 40,6" stroke="#ff3b5c" strokeWidth="1.2" fill="none" strokeLinecap="round" />
           </svg>
           <div style={{ fontSize: 10, fontWeight: 700, color: '#fff', marginTop: 2 }}>{total.toLocaleString('tr-TR')}</div>
-          <div style={{ fontSize: 7, color: '#445' }}>bugün</div>
+          <div style={{ fontSize: 7, color: '#888' }}>bugün</div>
         </div>
       </div>
 
@@ -489,9 +489,9 @@ export default function Map({ results, event, onVoted, onlineCount }: any) {
           <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, fontWeight: 600, color: '#ccd' }}>
             <span style={{ color: '#ff3b5c', animation: 'blink 1s infinite' }}>●</span>
             CANLI AKIŞ
-            <span style={{ fontSize: 9, color: '#445', fontWeight: 400 }}>illerden son duygular</span>
+            <span style={{ fontSize: 9, color: '#888', fontWeight: 400 }}>illerden son duygular</span>
           </div>
-          <div style={{ fontSize: 11, color: '#445', cursor: 'pointer' }}>Tümünü Gör ›</div>
+          <div style={{ fontSize: 11, color: '#888', cursor: 'pointer' }}>Tümünü Gör ›</div>
         </div>
         <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4, scrollbarWidth: 'none' }}>
           {[
@@ -502,7 +502,7 @@ export default function Map({ results, event, onVoted, onlineCount }: any) {
             { c: 'Trabzon', e: 'sakin', t: '2 dk' },
           ].map((f, i) => (
             <div key={i} style={{ background: '#0e1520', border: '.5px solid #1a2535', borderRadius: 12, padding: '10px 12px', minWidth: 95, flexShrink: 0, position: 'relative' }}>
-              <div style={{ fontSize: 9, color: '#445', marginBottom: 4 }}>
+              <div style={{ fontSize: 9, color: '#888', marginBottom: 4 }}>
                 <span style={{ color: COLORS[f.e], fontSize: 7 }}>● </span>{f.t} önce
               </div>
               <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 3 }}>{f.c}</div>
