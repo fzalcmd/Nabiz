@@ -288,6 +288,7 @@ export default function Map({ results, event, onVoted, onlineCount }: any) {
   const [selectedEmotion, setSelectedEmotion] = useState<string | null>(null)
   const [selectedProvince, setSelectedProvince] = useState<string | null>(null)
   const [voted, setVoted] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [secs, setSecs] = useState(0)
   const [filterIl, setFilterIl] = useState('Tümü')
   const [showFilter, setShowFilter] = useState(false)
@@ -307,14 +308,17 @@ export default function Map({ results, event, onVoted, onlineCount }: any) {
   }, [])
 
   async function submitVote() {
-    if (!selectedEmotion || !event) return
+    if (!selectedEmotion || !event || isSubmitting) return
+    setIsSubmitting(true)
 
     // Konum tespiti
     let detectedProvince = selectedProvince
     if (!detectedProvince) {
       detectedProvince = await new Promise<string | null>((resolve) => {
         if (!navigator.geolocation) { resolve(null); return }
+        const timer = setTimeout(() => resolve(null), 5000)
         navigator.geolocation.getCurrentPosition(async (pos) => {
+          clearTimeout(timer)
           try {
             const { latitude, longitude } = pos.coords
             const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&accept-language=tr`)
@@ -344,6 +348,7 @@ export default function Map({ results, event, onVoted, onlineCount }: any) {
       setVoted(true)
       setShowShare(false)
       setSelectedEmotion(null)
+      setIsSubmitting(false)
       onVoted()
       setTimeout(() => setVoted(false), 3000)
     }
@@ -524,7 +529,7 @@ export default function Map({ results, event, onVoted, onlineCount }: any) {
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <svg width="22" height="12" viewBox="0 0 40 16" fill="none"><polyline points="0,8 8,8 12,2 16,14 20,2 24,14 28,8 40,8" stroke="#fff" strokeWidth="2.2" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                  <span>DUYGU PAYLAŞ</span>
+                  <span>{isSubmitting ? 'GÖNDERİLİYOR...' : 'DUYGU PAYLAŞ'}</span>
                   </div>
             <div style={{ fontSize: 10, opacity: .75, fontWeight: 400, textTransform: 'none', letterSpacing: 0, marginTop: 2 }}>Sen de ülkenin nabzına katıl</div>
           </div>
@@ -570,7 +575,7 @@ export default function Map({ results, event, onVoted, onlineCount }: any) {
                 </button>
               ))}
             </div>
-            <button onClick={submitVote} disabled={!selectedEmotion}
+            <button onClick={submitVote} disabled={!selectedEmotion || isSubmitting}
               style={{ width: '100%', background: '#3a0010', border: 'none', borderRadius: 50, padding: '8px 20px', fontSize: 13, fontWeight: 500, color: '#fff', cursor: selectedEmotion ? 'pointer' : 'not-allowed', opacity: selectedEmotion ? 1 : 0.4, boxShadow: '0 0 10px #ff0044, 0 0 25px #ff004499, 0 0 50px #ff004444', outline: '1.5px solid #ff0044' }}>
               Paylaş
             </button>
