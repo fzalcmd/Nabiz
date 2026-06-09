@@ -61,9 +61,9 @@ function useStaticMap(mapRef: React.RefObject<HTMLDivElement | null>, onProvince
 
       // Arkaplan
       const bg = defs.append('radialGradient').attr('id', 'bgG').attr('cx', '40%').attr('cy', '50%').attr('r', '70%')
-      bg.append('stop').attr('offset', '0%').attr('stop-color', '#0d2218')
-      bg.append('stop').attr('offset', '60%').attr('stop-color', '#071410')
-      bg.append('stop').attr('offset', '100%').attr('stop-color', '#030810')
+      bg.append('stop').attr('offset', '0%').attr('stop-color', '#050505')
+      bg.append('stop').attr('offset', '60%').attr('stop-color', '#030303')
+      bg.append('stop').attr('offset', '100%').attr('stop-color', '#030303')
       svg.append('rect').attr('width', W).attr('height', H).attr('fill', 'url(#bgG)')
 
       // Border glow
