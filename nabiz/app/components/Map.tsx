@@ -39,6 +39,7 @@ function useStaticMap(mapRef: React.RefObject<HTMLDivElement | null>, onProvince
   const drawn = useRef(false)
   const pathsRef = useRef<Record<string, SVGPathElement>>({})
   const orbsRef = useRef<Record<string, SVGCircleElement>>({})
+  const animActiveRef = useRef(true)
 
   useEffect(() => {
     if (drawn.current || !mapRef.current) return
@@ -140,7 +141,7 @@ function useStaticMap(mapRef: React.RefObject<HTMLDivElement | null>, onProvince
             rip.attr('r', r).attr('opacity', '.5')
             rip.transition().delay(delay).duration(2500).ease(d3.easeCubicOut)
               .attr('r', r * 4).attr('opacity', '0')
-              .on('end', () => { if (ripRunning) setTimeout(animRip, 500) })
+              .on('end', () => { if (animActiveRef.current) setTimeout(animRip, 500) })
           }
           animRip()
         }
@@ -162,7 +163,7 @@ function useStaticMap(mapRef: React.RefObject<HTMLDivElement | null>, onProvince
             if (!pulseRunning) return
             orb.transition().duration(1000).ease(d3.easeSinInOut).attr('r', r * 1.25)
               .transition().duration(1000).ease(d3.easeSinInOut).attr('r', r)
-              .on('end', () => { if (pulseRunning) animPulse() })
+              .on('end', () => { if (animActiveRef.current) animPulse() })
           }
           animPulse()
         }
