@@ -35,7 +35,7 @@ function nn(s: string) {
 }
 
 // ── KATMAN 1: Statik harita — sadece bir kere çizilir ──
-function useStaticMap(mapRef: React.RefObject<HTMLDivElement | null>, onProvinceClick: (name: string) => void) {
+function useStaticMap(mapRef: React.RefObject<HTMLDivElement | null>, onProvinceClick: (name: string) => void, selectedProvince?: string | null) {
   const drawn = useRef(false)
   const pathsRef = useRef<Record<string, SVGPathElement>>({})
   const orbsRef = useRef<Record<string, SVGCircleElement>>({})
@@ -182,7 +182,8 @@ function useColorUpdate(
   orbsRef: React.RefObject<Record<string, SVGCircleElement>>,
   pathsRef: React.RefObject<Record<string, SVGPathElement>>,
       byProvince: Record<string, any>
-      ) {
+  byProvince: Record<string, any>,
+  selectedProvince?: string | null
         const ringsRef = useRef<Record<string, SVGCircleElement[]>>({})
 
           useEffect(() => {
@@ -292,7 +293,7 @@ export default function Map({ results, event, onVoted, onlineCount }: any) {
   }, [])
 
 
-  const { orbsRef, pathsRef } = useStaticMap(mapRef, handleProvinceClick)
+  const { orbsRef, pathsRef } = useStaticMap(mapRef, handleProvinceClick, selectedProvince)
   useColorUpdate(orbsRef, pathsRef, results?.byProvince || {}, selectedProvince)
 
   useEffect(() => {
