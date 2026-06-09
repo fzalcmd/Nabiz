@@ -156,16 +156,9 @@ function useStaticMap(mapRef: React.RefObject<HTMLDivElement | null>, onProvince
 
         orbsRef.current[k] = orb.node() as SVGCircleElement
 
-        // Pulse — sadece büyük şehirlerde
+        // Pulse — veri değişince useColorUpdate tetikler
         if (isBig) {
-          let pulseRunning = true
-          function animPulse() {
-            if (!pulseRunning) return
-            orb.transition().duration(1000).ease(d3.easeSinInOut).attr('r', r * 1.25)
-              .transition().duration(1000).ease(d3.easeSinInOut).attr('r', r)
-              .on('end', () => { if (animActiveRef.current) animPulse() })
-          }
-          animPulse()
+          (orb as any).__baseR = r
         }
 
         // Şehir etiketi — sadece büyük şehirler
