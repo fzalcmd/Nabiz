@@ -335,7 +335,7 @@ export default function Map({ results, event, onVoted, onlineCount }: any) {
     const res = await fetch('/api/vote', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ province: selectedProvince || 'Bilinmiyor', emotion: selectedEmotion, eventId: event.id })
+      body: JSON.stringify({ province: selectedProvince || province || 'Bilinmiyor', emotion: selectedEmotion, eventId: event.id })
     })
     const data = await res.json()
     if (data.success) {
