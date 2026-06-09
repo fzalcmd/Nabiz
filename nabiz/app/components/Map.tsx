@@ -55,7 +55,7 @@ function useStaticMap(mapRef: React.RefObject<HTMLDivElement | null>, onProvince
       const svg = d3.select(wrap).append('svg')
         .attr('viewBox', `0 0 ${W} ${H}`)
         .attr('width', W).attr('height', H)
-        .style('animation', 'mapBreathe 3s ease-in-out infinite')
+        
 
       const defs = svg.append('defs')
 
