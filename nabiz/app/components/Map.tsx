@@ -222,9 +222,9 @@ function useColorUpdate(
         }
       }
 
-      const oldRings = ringsRef.current[k] || []
+      const oldRings = orbsRef.current[k] || []
                                                                                                                       oldRings.forEach(r => r.remove())
-                                                                                                                            ringsRef.current[k] = []
+                                                                                                                            orbsRef.current[k] = []
 
                                                                                                                                   if (totalVotes === 0) return
 
@@ -247,7 +247,7 @@ function useColorUpdate(
                                                                                                                                                                                                                                             ring.setAttribute('opacity', '0')
                                                                                                                                                                                                                                                     ring.style.pointerEvents = 'none'
                                                                                                                                                                                                                                                             svg.appendChild(ring)
-                                                                                                                                                                                                                                                                    ringsRef.current[k] = [...(ringsRef.current[k] || []), ring]
+                                                                                                                                                                                                                                                                    orbsRefRef.current[k] = [...(orbsRef.current[k] || []), ring]
 
                                                                                                                                                                                                                                                                             const delay = i * 800
                                                                                                                                                                                                                                                                                     const maxR = r * (3 + i * 1.5)
