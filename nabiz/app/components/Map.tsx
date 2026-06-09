@@ -46,7 +46,7 @@ function useStaticMap(mapRef: React.RefObject<HTMLDivElement | null>, onProvince
     drawn.current = true
 
     async function draw() {
-      const geo = await d3.json('https://cdn.jsdelivr.net/gh/alpers/Turkey-Maps-GeoJSON@master/tr-cities.json') as any
+      const geo = await d3.json('/tr-cities.json') as any
       const wrap = mapRef.current!
       wrap.innerHTML = ''
       const W = wrap.clientWidth || 360
