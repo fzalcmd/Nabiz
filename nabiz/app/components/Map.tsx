@@ -201,7 +201,7 @@ function useColorUpdate(
                                     const byProv = provName ? (byProvince[provName] || {}) : {}
                                           const totalVotes = (Object.values(byProv) as number[]).reduce((a, b) => a + b, 0)
                                                 const topEm = Object.keys(byProv).length > 0
-                                                        ? Object.keys(byProv).reduce((a, b) => byProv[a] > byProv[b] ? a : b)
+                                                        ? Object.keys(byProv).reduce((a, b) => byProv[a] > byProv[b] ? a : byProv[a] === byProv[b] ? (EMOTIONS.indexOf(a) <= EMOTIONS.indexOf(b) ? a : b) : b)
                                                                 : null
                                                                       const color = topEm ? COLORS[topEm] : '#f4a261'
 
