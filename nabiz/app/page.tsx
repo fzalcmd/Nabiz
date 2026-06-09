@@ -5,9 +5,9 @@ import { createClient } from '@supabase/supabase-js'
 import Map from './components/Map'
 
 const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+    'https://rrqghwcfgcmeflazvawo.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJycWdod2NmZ2NtZWZsYXp2YXdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyOTM4NDYsImV4cCI6MjA5NTg2OTg0Nn0.aJTe71VNelu-esDmITiuGWZgR0hapmcLEit4ZPrg35Q'
+      )
 
 export default function Home() {
   const [results, setResults] = useState<any>(null)
