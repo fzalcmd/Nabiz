@@ -183,7 +183,6 @@ function useColorUpdate(
   pathsRef: React.RefObject<Record<string, SVGPathElement>>,
   byProvince: Record<string, any>
 ) {
-) {
 
           useEffect(() => {
               if (!orbsRef.current) return
