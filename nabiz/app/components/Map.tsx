@@ -35,7 +35,7 @@ function nn(s: string) {
 }
 
 // ── KATMAN 1: Statik harita — sadece bir kere çizilir ──
-function useStaticMap(mapRef: React.RefObject<HTMLDivElement | null>, onProvinceClick: (name: string) => void, selectedProvince?: string | null) {
+function useStaticMap(mapRef: React.RefObject<HTMLDivElement | null>, onProvinceClick: (name: string) => void) {
   const drawn = useRef(false)
   const pathsRef = useRef<Record<string, SVGPathElement>>({})
   const orbsRef = useRef<Record<string, SVGCircleElement>>({})
@@ -181,8 +181,8 @@ function useStaticMap(mapRef: React.RefObject<HTMLDivElement | null>, onProvince
 function useColorUpdate(
   orbsRef: React.RefObject<Record<string, SVGCircleElement>>,
   pathsRef: React.RefObject<Record<string, SVGPathElement>>,
-  byProvince: Record<string, any>,
-  selectedProvince?: string | null
+  byProvince: Record<string, any>
+) {
 ) {
 
           useEffect(() => {
@@ -286,14 +286,36 @@ export default function Map({ results, event, onVoted, onlineCount }: any) {
   const [filterIl, setFilterIl] = useState('Tümü')
   const [showFilter, setShowFilter] = useState(false)
 
+  // Highlight effect - seçili il
+  useEffect(() => {
+    if (!pathsRef.current) return
+    Object.entries(pathsRef.current).forEach(([k, pathEl]) => {
+      if (!pathEl) return
+      const isSelected = selectedProvince && (
+        k === selectedProvince ||
+        k.toLowerCase().includes(selectedProvince.toLowerCase()) ||
+        selectedProvince.toLowerCase().includes(k.toLowerCase())
+      )
+      if (isSelected) {
+        pathEl.setAttribute('stroke', '#ffffff')
+        pathEl.setAttribute('stroke-opacity', '0.9')
+        pathEl.setAttribute('stroke-width', '2')
+      } else {
+        pathEl.setAttribute('stroke', '#1E90FF')
+        pathEl.setAttribute('stroke-opacity', '0.5')
+        pathEl.setAttribute('stroke-width', '0.5')
+      }
+    })
+  }, [selectedProvince, pathsRef])
+
   const handleProvinceClick = useCallback((name: string) => {
     setSelectedProvince(name)
     setShowShare(true)
   }, [])
 
 
-  const { orbsRef, pathsRef } = useStaticMap(mapRef, handleProvinceClick, selectedProvince)
-  useColorUpdate(orbsRef, pathsRef, results?.byProvince || {}, selectedProvince)
+  const { orbsRef, pathsRef } = useStaticMap(mapRef, handleProvinceClick)
+  useColorUpdate(orbsRef, pathsRef, results?.byProvince || {})
 
   useEffect(() => {
     const t = setInterval(() => setSecs(s => s + 1), 1000)
