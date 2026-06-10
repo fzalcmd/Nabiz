@@ -464,33 +464,13 @@ export default function Map({ results, event, onVoted, onlineCount }: any) {
           <div style={{ fontSize: 11, color: '#888', cursor: 'pointer' }}>Tümünü Gör ›</div>
         </div>
         <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4, scrollbarWidth: 'none' }}>
-          {results?.liveFeed?.map((f: any, i: number) => (
-              <div
-                  key={i}
-                      style={{
-                            background: '#0a0a0f',
-                                  border: '.5px solid #1a2535',
-                                        borderRadius: 12,
-                                              padding: '10px 12px',
-                                                    minWidth: 95,
-                                                          flexShrink: 0,
-                                                                position: 'relative'
-                                                                    }}
-                                                                      >
-                                                                          <div style={{ fontSize: 13, fontWeight: 600 }}>
-                                                                                {f.province}
-                                                                                    </div>
-
-                                                                                        <div style={{ fontSize: 11, color: '#aaa' }}>
-                                                                                              {f.emotion}
-                                                                                                  </div>
-
-                                                                                                      <div style={{ fontSize: 9, color: '#666' }}>
-                                                                                                            {new Date(f.time).toLocaleTimeString()}
-                                                                                                                </div>
-                                                                                                                  </div>
-                                                                                                                  ))}
-          ))}
+          {[
+            { c: 'İzmir', e: 'umutlu', t: 'Az önce' },
+            { c: 'Ankara', e: 'karmaşık', t: '30 sn' },
+            { c: 'Adana', e: 'öfkeli', t: '1 dk' },
+            { c: 'Bursa', e: 'yorgun', t: '1 dk' },
+            { c: 'Trabzon', e: 'sakin', t: '2 dk' },
+          ].map((f, i) => (
             <div key={i} style={{ background: '#0a0a0f', border: '.5px solid #1a2535', borderRadius: 12, padding: '10px 12px', minWidth: 95, flexShrink: 0, position: 'relative' }}>
               <div style={{ fontSize: 9, color: '#888', marginBottom: 4 }}>
                 <span style={{ color: COLORS[f.e], fontSize: 7 }}>● </span>{f.t} önce
