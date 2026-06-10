@@ -188,7 +188,7 @@ function useColorUpdate(
 
     Object.entries(orbsRef.current).forEach(([k, elements]) => {
 
-      const provName = Object.keys(byProvince).find(n => n === k)
+      const provName = Object.keys(byProvince).find(n => nn(n) === k)
       const byProv = provName ? (byProvince[provName] || {}) : {}
       const totalVotes = (Object.values(byProv) as number[]).reduce((a, b) => a + b, 0)
       const topEm = Object.keys(byProv).length > 0
