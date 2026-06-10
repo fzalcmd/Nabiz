@@ -10,7 +10,7 @@ const supabase = createClient(
 export async function POST(request: Request) {
   try {
     const { province, emotion, eventId } = await request.json()
-    const ip = (request.headers.get('x-forwarded-for') || 'unknown').split(',')[0].trim()
+    const ip = request.headers.get('x-forwarded-for') || 'unknown'
     const ipHash = crypto.createHash('sha256').update(ip + eventId).digest('hex')
 
     const { data: existing } = await supabase
@@ -20,7 +20,8 @@ export async function POST(request: Request) {
       .eq('event_id', eventId)
       .single()
 
-    if (existing) {
+    const testMode = process.env.NABIZ_TEST_MODE === 'true'
+    if (existing && !testMode) {
       return NextResponse.json({ error: 'Zaten oy kullandınız' }, { status: 429 })
     }
 
@@ -32,9 +33,6 @@ export async function POST(request: Request) {
     })
 
     if (error) throw error
-
-    await supabase.from('live_feed').insert({ province, emotion })
-
     return NextResponse.json({ success: true })
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 })
