@@ -230,6 +230,13 @@ function useColorUpdate(
     })
   }, [pathsRef, orbsRef, byProvince])
 }
+function timeAgo(ts: string) {
+  const diff = Math.floor((Date.now() - new Date(ts).getTime()) / 1000)
+  if (diff < 60) return `${diff} sn`
+  if (diff < 3600) return `${Math.floor(diff/60)} dk`
+  return `${Math.floor(diff/3600)} sa`
+}
+
 export default function Map({ results, event, onVoted, onlineCount }: any) {
   const mapRef = useRef<HTMLDivElement>(null)
   const [showShare, setShowShare] = useState(false)
@@ -254,14 +261,14 @@ export default function Map({ results, event, onVoted, onlineCount }: any) {
   // Realtime feed
   useEffect(() => {
     supabase.from('live_feed').select('province,emotion,created_at').order('created_at', { ascending: false }).limit(5).then(({ data }) => {
-      if (data) setFeed(data.map((r: any) => ({ c: r.province, e: r.emotion, t: 'az önce' })))
+      if (data) setFeed(data.map((r: any) => ({ c: r.province, e: r.emotion, t: r.created_at })))
     })
     const channel = supabase
       .channel('live-feed')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'live_feed' }, (payload) => {
         const row = payload.new as any
         setFeed(prev => [
-          { c: row.province, e: row.emotion, t: 'az önce' },
+          { c: row.province, e: row.emotion, t: row.created_at },
           ...prev.slice(0, 19)
         ])
       })
@@ -492,7 +499,7 @@ export default function Map({ results, event, onVoted, onlineCount }: any) {
           {feed.map((f, i) => (
             <div key={i} style={{ background: '#0a0a0f', border: '.5px solid #1a2535', borderRadius: 12, padding: '10px 12px', minWidth: 95, flexShrink: 0, position: 'relative' }}>
               <div style={{ fontSize: 9, color: '#888', marginBottom: 4 }}>
-                <span style={{ color: COLORS[f.e], fontSize: 7 }}>● </span>{f.t} önce
+                <span style={{ color: COLORS[f.e], fontSize: 7 }}>● </span>{timeAgo(f.t)} önce
               </div>
               <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 3 }}>{f.c}</div>
               <div style={{ fontSize: 11, color: COLORS[f.e], display: 'flex', alignItems: 'center', gap: 3 }}>
