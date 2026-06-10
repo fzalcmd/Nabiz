@@ -33,6 +33,9 @@ export async function POST(request: Request) {
     })
 
     if (error) throw error
+
+    await supabase.from('live_feed').insert({ province, emotion })
+
     return NextResponse.json({ success: true })
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 })
