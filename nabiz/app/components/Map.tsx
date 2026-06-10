@@ -220,7 +220,6 @@ function useColorUpdate(
           pathEl.setAttribute('stroke-opacity', '0.5')
           pathEl.setAttribute('stroke-width', '0.5')
         }
-  }, [pathsRef, orbsRef, byProvince])
 }
 export default function Map({ results, event, onVoted, onlineCount }: any) {
   const mapRef = useRef<HTMLDivElement>(null)
