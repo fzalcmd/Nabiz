@@ -21,7 +21,7 @@ export async function POST(request: Request) {
       .single()
 
     const testMode = process.env.NABIZ_TEST_MODE === 'true'
-    const devIp = ip === '20.61.127.53'
+    const devIp = ip === '46.154.79.230'
     if (existing && !testMode && !devIp) {
       return NextResponse.json({ error: 'Zaten oy kullandınız' }, { status: 429 })
     }
