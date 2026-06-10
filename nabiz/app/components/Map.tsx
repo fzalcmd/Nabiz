@@ -1,6 +1,12 @@
 'use client'
 
 import { useEffect, useRef, useState, useCallback } from 'react'
+import { createClient } from '@supabase/supabase-js'
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
 import * as d3 from 'd3'
 
 const EMOTIONS = ['öfkeli', 'karmaşık', 'umutlu', 'yorgun', 'sakin', 'mutlu', 'üzgün', 'kaygılı', 'korkmuş', 'heyecanlı', 'aşık', 'gururlu', 'hayal kırıklığı', 'nötr']
@@ -234,6 +240,7 @@ export default function Map({ results, event, onVoted, onlineCount }: any) {
   const [secs, setSecs] = useState(0)
   const [filterIl, setFilterIl] = useState('Tümü')
   const [showFilter, setShowFilter] = useState(false)
+  const [feed, setFeed] = useState<{c: string, e: string, t: string}[]>([])
 
   const handleProvinceClick = useCallback((name: string) => {
     setSelectedProvince(name)
@@ -243,6 +250,21 @@ export default function Map({ results, event, onVoted, onlineCount }: any) {
 
   const { orbsRef, pathsRef } = useStaticMap(mapRef, handleProvinceClick)
   useColorUpdate(orbsRef, pathsRef, results?.byProvince || {})
+
+  // Realtime feed
+  useEffect(() => {
+    const channel = supabase
+      .channel('live-feed')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'votes' }, (payload) => {
+        const row = payload.new as any
+        setFeed(prev => [
+          { c: row.province, e: row.emotion, t: 'az önce' },
+          ...prev.slice(0, 19)
+        ])
+      })
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
+  }, [])
 
   // Highlight effect - seçili il
   useEffect(() => {
@@ -464,13 +486,7 @@ export default function Map({ results, event, onVoted, onlineCount }: any) {
           <div style={{ fontSize: 11, color: '#888', cursor: 'pointer' }}>Tümünü Gör ›</div>
         </div>
         <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4, scrollbarWidth: 'none' }}>
-          {[
-            { c: 'İzmir', e: 'umutlu', t: 'Az önce' },
-            { c: 'Ankara', e: 'karmaşık', t: '30 sn' },
-            { c: 'Adana', e: 'öfkeli', t: '1 dk' },
-            { c: 'Bursa', e: 'yorgun', t: '1 dk' },
-            { c: 'Trabzon', e: 'sakin', t: '2 dk' },
-          ].map((f, i) => (
+          {feed.map((f, i) => (
             <div key={i} style={{ background: '#0a0a0f', border: '.5px solid #1a2535', borderRadius: 12, padding: '10px 12px', minWidth: 95, flexShrink: 0, position: 'relative' }}>
               <div style={{ fontSize: 9, color: '#888', marginBottom: 4 }}>
                 <span style={{ color: COLORS[f.e], fontSize: 7 }}>● </span>{f.t} önce
