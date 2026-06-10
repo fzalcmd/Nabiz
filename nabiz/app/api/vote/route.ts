@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 import crypto from 'crypto'
+const ADMIN_KEY = 'benim-super-test-key'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -19,9 +20,11 @@ export async function POST(request: Request) {
       .eq('ip_hash', ipHash)
       .eq('event_id', eventId)
       .single()
+      const isAdmin =
+        request.headers.get('x-admin-key') === ADMIN_KEY
 
-    const testMode = process.env.NABIZ_TEST_MODE === 'true'
-    if (existing && !testMode) {
+    
+    if (existing && !isAdmin) {
       return NextResponse.json({ error: 'Zaten oy kullandınız' }, { status: 429 })
     }
 
