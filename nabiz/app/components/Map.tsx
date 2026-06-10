@@ -253,9 +253,12 @@ export default function Map({ results, event, onVoted, onlineCount }: any) {
 
   // Realtime feed
   useEffect(() => {
+    supabase.from('live_feed').select('province,emotion,created_at').order('created_at', { ascending: false }).limit(5).then(({ data }) => {
+      if (data) setFeed(data.map((r: any) => ({ c: r.province, e: r.emotion, t: 'az önce' })))
+    })
     const channel = supabase
       .channel('live-feed')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'votes' }, (payload) => {
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'live_feed' }, (payload) => {
         const row = payload.new as any
         setFeed(prev => [
           { c: row.province, e: row.emotion, t: 'az önce' },
