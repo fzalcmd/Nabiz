@@ -20,7 +20,8 @@ export async function POST(request: Request) {
       .eq('event_id', eventId)
       .single()
 
-    if (existing) {
+    const testMode = process.env.NABIZ_TEST_MODE === 'true'
+    if (existing && !testMode) {
       return NextResponse.json({ error: 'Zaten oy kullandınız' }, { status: 429 })
     }
 
