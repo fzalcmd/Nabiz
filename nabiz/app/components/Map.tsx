@@ -231,7 +231,8 @@ function useColorUpdate(
   }, [pathsRef, orbsRef, byProvince])
 }
 function timeAgo(ts: string) {
-  const diff = Math.floor((Date.now() - new Date(ts).getTime()) / 1000)
+  const diff = Math.floor((Date.now() - new Date(ts + 'Z').getTime()) / 1000)
+  if (diff < 10) return 'az önce'
   if (diff < 60) return `${diff} sn`
   if (diff < 3600) return `${Math.floor(diff/60)} dk`
   return `${Math.floor(diff/3600)} sa`
