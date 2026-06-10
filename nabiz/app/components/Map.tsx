@@ -186,7 +186,7 @@ function useColorUpdate(
 ) {
   useEffect(() => {
 
-    Object.entries(orbsRef.current).forEach(([k, elements]) => {
+    Object.entries(orbsRef.current).forEach(([k, el]) => {
 
       const provName = Object.keys(byProvince).find(n => n === k)
       const byProv = provName ? (byProvince[provName] || {}) : {}
@@ -220,7 +220,6 @@ function useColorUpdate(
           pathEl.setAttribute('stroke-opacity', '0.5')
           pathEl.setAttribute('stroke-width', '0.5')
         }
-      }
     })
   }, [pathsRef, orbsRef, byProvince])
 }
