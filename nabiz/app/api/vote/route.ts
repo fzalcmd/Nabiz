@@ -10,7 +10,7 @@ const supabase = createClient(
 
 export async function POST(request: Request) {
   try {
-    const { province, emotion, eventId } = await request.json()
+    const { province, emotion, eventId, dev } = await request.json()
     const ip = request.headers.get('x-forwarded-for') || 'unknown'
     const ipHash = crypto.createHash('sha256').update(ip + eventId).digest('hex')
 
