@@ -186,7 +186,7 @@ function useColorUpdate(
 ) {
   useEffect(() => {
 
-    Object.entries(orbsRef.current).forEach(([k, el]) => {
+    Object.entries(orbsRef.current).forEach(([k, elements]) => {
 
       const provName = Object.keys(byProvince).find(n => n === k)
       const byProv = provName ? (byProvince[provName] || {}) : {}
@@ -220,9 +220,10 @@ function useColorUpdate(
           pathEl.setAttribute('stroke-opacity', '0.5')
           pathEl.setAttribute('stroke-width', '0.5')
         }
+      }
+    })
   }, [pathsRef, orbsRef, byProvince])
 }
-
 export default function Map({ results, event, onVoted, onlineCount }: any) {
   const mapRef = useRef<HTMLDivElement>(null)
   const [showShare, setShowShare] = useState(false)
