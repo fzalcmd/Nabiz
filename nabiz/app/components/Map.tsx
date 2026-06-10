@@ -266,28 +266,6 @@ export default function Map({ results, event, onVoted, onlineCount }: any) {
     })
   }, [selectedProvince, pathsRef])
 
-  // Highlight effect - seçili il
-  useEffect(() => {
-    if (!pathsRef.current) return
-    Object.entries(pathsRef.current).forEach(([k, pathEl]) => {
-      if (!pathEl) return
-      const isSelected = selectedProvince && (
-        k === selectedProvince ||
-        k.toLowerCase().includes(selectedProvince.toLowerCase()) ||
-        selectedProvince.toLowerCase().includes(k.toLowerCase())
-      )
-      if (isSelected) {
-        pathEl.setAttribute('stroke', '#ffffff')
-        pathEl.setAttribute('stroke-opacity', '0.9')
-        pathEl.setAttribute('stroke-width', '2')
-      } else {
-        pathEl.setAttribute('stroke', '#1E90FF')
-        pathEl.setAttribute('stroke-opacity', '0.5')
-        pathEl.setAttribute('stroke-width', '0.5')
-      }
-    })
-  }, [selectedProvince, pathsRef])
-
   useEffect(() => {
     const t = setInterval(() => setSecs(s => s + 1), 1000)
     return () => clearInterval(t)
