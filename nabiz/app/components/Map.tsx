@@ -259,6 +259,14 @@ export default function Map({ results, event, onVoted, onlineCount }: any) {
   const { orbsRef, pathsRef } = useStaticMap(mapRef, handleProvinceClick)
   useColorUpdate(orbsRef, pathsRef, results?.byProvince || {})
 
+  // Dev key setup
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('devKey') === 'nabiz2026') {
+      localStorage.setItem('nabizDevKey', 'nabiz2026')
+    }
+  }, [])
+
   // Realtime feed
   useEffect(() => {
     supabase.from('live_feed').select('province,emotion,created_at').order('created_at', { ascending: false }).limit(5).then(({ data }) => {
@@ -338,7 +346,7 @@ export default function Map({ results, event, onVoted, onlineCount }: any) {
     const res = await fetch('/api/vote', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ province: detectedProvince, emotion: selectedEmotion, eventId: event.id })
+      body: JSON.stringify({ province: detectedProvince, emotion: selectedEmotion, eventId: event.id, devKey: typeof window !== 'undefined' && localStorage.getItem('nabizDevKey') || undefined })
     })
     const data = await res.json()
     if (data.success) {
