@@ -222,6 +222,7 @@ function useColorUpdate(
         }
   }, [pathsRef, orbsRef, byProvince])
 }
+
 export default function Map({ results, event, onVoted, onlineCount }: any) {
   const mapRef = useRef<HTMLDivElement>(null)
   const [showShare, setShowShare] = useState(false)
