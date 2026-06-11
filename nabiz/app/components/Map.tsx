@@ -501,7 +501,7 @@ export default function Map({ results, event, onVoted, onlineCount }: any) {
       </div>
 
       {/* CTA */}
-      <div style={{ padding: '0 14px 2px' }}>
+      <div style={{ padding: '0 14px 8px', position: 'sticky', bottom: 0, background: '#07090f' }}>
         <button onClick={() => setShowShare(true)}
           style={{ width: '100%', background: '#3a0010', border: 'none', borderRadius: 50, padding: '3px 16px', fontSize: 11, fontWeight: 400, color: '#fff', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4, textTransform: 'uppercase', letterSpacing: .5, boxShadow: '0 0 10px #ff0044, 0 0 25px #ff004499, 0 0 50px #ff004444', outline: '1.5px solid #ff0044' }}>
           
