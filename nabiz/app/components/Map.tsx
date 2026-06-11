@@ -317,26 +317,6 @@ export default function Map({ results, event, onVoted, onlineCount }: any) {
 
     // Konum tespiti
     let detectedProvince = selectedProvince
-    if (!detectedProvince) {
-      detectedProvince = await new Promise<string | null>((resolve) => {
-        if (!navigator.geolocation) { resolve(null); return }
-        const timer = setTimeout(() => resolve(null), 5000)
-        navigator.geolocation.getCurrentPosition(async (pos) => {
-          clearTimeout(timer)
-          try {
-            const { latitude, longitude } = pos.coords
-            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&accept-language=tr`)
-            const data = await res.json()
-            const p = data.address?.province || data.address?.state || data.address?.city
-            if (p) {
-              const clean = p.replace(' İli', '').replace(' Province', '').trim()
-              setSelectedProvince(clean)
-              resolve(clean)
-            } else resolve(null)
-          } catch { resolve(null) }
-        }, () => resolve(null))
-      })
-    }
 
     if (!detectedProvince) {
       alert('Lütfen haritadan bir il seçiniz 📍')
