@@ -538,12 +538,22 @@ export default function Map({ results, event, onVoted, onlineCount }: any) {
 
       {/* PAYLAŞ MODAL */}
       {showShare && (
-        <div onClick={() => setShowShare(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.85)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', zIndex: 200 }}>
-          <div onClick={e => e.stopPropagation()} style={{ background: '#0a0a0f', borderRadius: '22px 22px 0 0', padding: '22px 18px 32px', width: '100%', maxWidth: 480, borderTop: '.5px solid #00d4ff44' }}>
+        <div onClick={() => setShowShare(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', zIndex: 200 }}>
+          <div onClick={e => e.stopPropagation()} style={{ background: '#0a0a0f', borderRadius: '22px 22px 0 0', padding: '22px 18px 32px', width: '100%', maxWidth: 480, borderTop: '.5px solid #00d4ff44', maxHeight: '85vh', overflowY: 'auto' }}>
             <div style={{ width: 36, height: 4, background: '#1e2a3a', borderRadius: 2, margin: '0 auto 18px' }} />
             <div style={{ fontSize: 16, fontWeight: 600, textAlign: 'center', marginBottom: 4 }}>Şu an nasıl hissediyorsun?</div>
             <div style={{ fontSize: 12, color: '#556', textAlign: 'center', marginBottom: 4 }}>{event?.title || 'Güncel olay hakkında'}</div>
-            {selectedProvince && <div style={{ fontSize: 11, color: '#00d4ff', textAlign: 'center', marginBottom: 14 }}>📍 {selectedProvince}</div>}
+            {selectedProvince && (() => {
+              const prov = results?.byProvince?.[selectedProvince] || {}
+              const total = Object.values(prov as any).reduce((a:any,b:any)=>a+b,0) as number
+              const top = Object.entries(prov as any).sort((a:any,b:any)=>b[1]-a[1])[0]
+              return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 14, background: '#0a1628', borderRadius: 10, padding: '8px 16px' }}>
+                <span style={{ fontSize: 11, color: '#00d4ff' }}>📍 {selectedProvince}</span>
+                {top && <span style={{ fontSize: 11, color: '#888' }}>•</span>}
+                {top && <span style={{ fontSize: 11, color: '#fff' }}>{top[0]}</span>}
+                {total > 0 && <span style={{ fontSize: 11, color: '#888' }}>• {total} oy</span>}
+              </div>
+            })()}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 10, marginBottom: 18 }}>
               {EMOTIONS.map(e => (
                 <button key={e} onClick={() => setSelectedEmotion(e)}
