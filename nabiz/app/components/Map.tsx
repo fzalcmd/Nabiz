@@ -225,6 +225,7 @@ function useColorUpdate(
           pathEl.setAttribute('stroke', '#1E90FF')
           pathEl.setAttribute('stroke-opacity', '0.5')
           pathEl.setAttribute('stroke-width', '0.5')
+          pathEl.style.animation = ''
         }
       }
     })
@@ -580,6 +581,7 @@ export default function Map({ results, event, onVoted, onlineCount }: any) {
       <style>{`
         @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.15} }
         @keyframes mapBreathe { 0%,100%{opacity:1} 50%{opacity:0.5} }
+        @keyframes provincePulse { 0%,100%{stroke-width:2;stroke-opacity:0.9} 50%{stroke-width:4;stroke-opacity:0.5} }
       `}</style>
     </div>
   )
