@@ -344,7 +344,7 @@ export default function Map({ results, event, onVoted, onlineCount }: any) {
     }
     const res = await fetch('/api/vote', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'x-admin-key': localStorage.getItem('ndev') === '1' ? 'benim-super-test-key' : '' },
       body: JSON.stringify({ province: detectedProvince, emotion: selectedEmotion, eventId: event.id, dev: localStorage.getItem('ndev') })
     })
     const data = await res.json()
