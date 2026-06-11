@@ -484,7 +484,7 @@ export default function Map({ results, event, onVoted, onlineCount }: any) {
           </div>
           <div style={{ fontSize: 11, color: '#888', cursor: 'pointer' }}>Tümünü Gör ›</div>
         </div>
-        <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4, scrollbarWidth: 'none' }}>
+        <div style={{ display: 'flex', gap: 8, overflowX: 'auto', overflowY: 'auto', paddingBottom: 80, scrollbarWidth: 'none' }}>
           {feed.map((f, i) => (
             <div key={i} style={{ background: '#0a0a0f', border: '.5px solid #1a2535', borderRadius: 12, padding: '10px 12px', minWidth: 95, flexShrink: 0, position: 'relative' }}>
               <div style={{ fontSize: 9, color: '#888', marginBottom: 4 }}>
