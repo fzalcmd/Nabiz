@@ -274,6 +274,8 @@ interface FeedItem {
   c: string
   e: string
   t: string
+  id: string
+  likes: number
 }
 
 interface MapProps {
@@ -285,6 +287,7 @@ interface MapProps {
 
 export default function Map({ results, event, onVoted, onlineCount }: MapProps) {
   const mapRef = useRef<HTMLDivElement>(null)
+  const feedRef = useRef<HTMLDivElement>(null)
   const [showShare, setShowShare] = useState(false)
   const [selectedEmotion, setSelectedEmotion] = useState<string | null>(null)
   const [selectedProvince, setSelectedProvince] = useState<string | null>(null)
@@ -296,6 +299,16 @@ export default function Map({ results, event, onVoted, onlineCount }: MapProps) 
   const [filterIl, setFilterIl] = useState('Tümü')
   const [showFilter, setShowFilter] = useState(false)
   const [feed, setFeed] = useState<FeedItem[]>([])
+  const [likedIds, setLikedIds] = useState<Set<string>>(new Set())
+
+  async function handleLike(id: string) {
+    if (likedIds.has(id)) return
+    const item = feed.find(f => f.id === id)
+    if (!item) return
+    setLikedIds(prev => new Set([...prev, id]))
+    setFeed(prev => prev.map(f => f.id === id ? {...f, likes: f.likes + 1} : f))
+    await supabase.from('live_feed').update({ likes: item.likes + 1 }).eq('id', id)
+  }
 
   const handleProvinceClick = useCallback((name: string) => {
     setSelectedProvince(name)
@@ -313,8 +326,8 @@ export default function Map({ results, event, onVoted, onlineCount }: MapProps) 
   }, [])
 
   useEffect(() => {
-    supabase.from('live_feed').select('province,emotion,created_at').order('created_at', { ascending: false }).limit(5).then(({ data }) => {
-      if (data) setFeed(data.map((r: any) => ({ c: r.province, e: r.emotion, t: r.created_at })))
+    supabase.from('live_feed').select('id,province,emotion,created_at,likes').order('created_at', { ascending: false }).limit(20).then(({ data }) => {
+      if (data) setFeed(data.map((r: any) => ({ id: r.id, c: r.province, e: r.emotion, t: r.created_at, likes: r.likes || 0 })))
     })
     
     // FIX #5: Supabase channel cleanup — unsubscribe() kullanılıyor
@@ -323,7 +336,7 @@ export default function Map({ results, event, onVoted, onlineCount }: MapProps) 
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'live_feed' }, (payload) => {
         const row = payload.new as any
         setFeed(prev => [
-          { c: row.province, e: row.emotion, t: row.created_at },
+          { id: row.id, c: row.province, e: row.emotion, t: row.created_at, likes: row.likes || 0 },
           ...prev.slice(0, 19)
         ])
       })
@@ -358,6 +371,20 @@ export default function Map({ results, event, onVoted, onlineCount }: MapProps) 
   }, [selectedProvince, pathsRef])
 
   useEffect(() => {
+    const el = feedRef.current
+    if (!el) return
+    let paused = false
+    const id = setInterval(() => {
+      if (paused) return
+      el.scrollLeft += 1
+      if (el.scrollLeft >= el.scrollWidth - el.clientWidth) el.scrollLeft = 0
+    }, 30)
+    el.addEventListener('touchstart', () => { paused = true })
+    el.addEventListener('touchend', () => { setTimeout(() => { paused = false }, 3000) })
+    return () => clearInterval(id)
+  }, [feed])
+  useEffect(() => {
+
     const t = setInterval(() => setSecs(s => s + 1), 1000)
     return () => clearInterval(t)
   }, [])
@@ -583,7 +610,7 @@ export default function Map({ results, event, onVoted, onlineCount }: MapProps) 
           <div style={{ fontSize: 11, color: '#888', cursor: 'pointer' }}>Tümünü Gör ›</div>
         </div>
         {/* FIX #15: overflowY gereksiz kaldırıldı */}
-        <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 80, scrollbarWidth: 'none' }}>
+        <div ref={feedRef} style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 80, scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
           {feed.map((f, i) => (
             <div key={`${f.t}-${f.c}`} style={{ background: '#0a0a0f', border: '.5px solid #1a2535', borderRadius: 12, padding: '10px 12px', minWidth: 95, flexShrink: 0, position: 'relative' }}>
               {/* FIX #8: timeAgo zaten "önce" içeriyor, dışarıda tekrar yazılmıyor */}
@@ -594,7 +621,11 @@ export default function Map({ results, event, onVoted, onlineCount }: MapProps) 
               <div style={{ fontSize: 11, color: COLORS[f.e], display: 'flex', alignItems: 'center', gap: 3 }}>
                 {EICO[f.e]} {f.e}
               </div>
-              <div style={{ position: 'absolute', right: 8, top: 8, fontSize: 13, opacity: .4 }}>🤍</div>
+              <div onClick={(e) => { e.stopPropagation(); handleLike(f.id) }}
+              style={{ position: 'absolute', right: 8, top: 8, cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+              <span style={{ fontSize: 13 }}>{likedIds.has(f.id) ? '❤️' : '🤍'}</span>
+              {f.likes > 0 && <span style={{ fontSize: 8, color: '#ff6b9d' }}>{f.likes}</span>}
+            </div>
             </div>
           ))}
         </div>
