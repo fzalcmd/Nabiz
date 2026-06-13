@@ -371,7 +371,7 @@ export default function Map({ results, event, onVoted, onlineCount }: MapProps) 
     setIsSubmitting(true)
   
 
-    const detectedProvince = selectedProvince
+    const detectedProvince = selectedProvince || ""
 
     
 
