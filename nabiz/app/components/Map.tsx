@@ -5,8 +5,8 @@ import { createClient } from '@supabase/supabase-js'
 
 // FIX #16: supabase client modül seviyesinde bir kere oluşturuluyor
 const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
 )
 
 import * as d3 from 'd3'
@@ -208,6 +208,7 @@ function useColorUpdate(
         }
       })
 
+      const isSelectedProvince = typeof window !== "undefined" && (window as any).__selectedProvince === k
       const pathEl = pathsRef.current?.[k]
       if (pathEl) {
         // FIX #3: seçili ilin stroke'unu useColorUpdate ezmesin
@@ -288,7 +289,9 @@ export default function Map({ results, event, onVoted, onlineCount }: MapProps) 
   const [selectedEmotion, setSelectedEmotion] = useState<string | null>(null)
   const [selectedProvince, setSelectedProvince] = useState<string | null>(null)
   const [voted, setVoted] = useState(false)
+  const [showProvinceWarning, setShowProvinceWarning] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showCityError, setShowCityError] = useState(false);9
   const [secs, setSecs] = useState(0)
   const [filterIl, setFilterIl] = useState('Tümü')
   const [showFilter, setShowFilter] = useState(false)
@@ -366,15 +369,11 @@ export default function Map({ results, event, onVoted, onlineCount }: MapProps) 
     
     if (isSubmitting) return
     setIsSubmitting(true)
+  
 
     const detectedProvince = selectedProvince
 
-    // FIX #1: erken return öncesi setIsSubmitting(false) çağrılıyor
-    if (!detectedProvince) {
-      alert('Lütfen haritadan bir il seçiniz 📍')
-      setIsSubmitting(false)
-      return
-    }
+    
 
     // FIX #7: try/catch ile API hata yönetimi — error parsing iyileştirildi
     try {
@@ -406,7 +405,7 @@ export default function Map({ results, event, onVoted, onlineCount }: MapProps) 
         } catch {
           // JSON parse hatası — original mesaj kullanılır
         }
-        throw new Error(errorMessage)
+        return
       }
 
       const data = await res.json()
@@ -480,7 +479,7 @@ export default function Map({ results, event, onVoted, onlineCount }: MapProps) 
           <div style={{ fontSize: 13, color: '#ff3b5c', fontWeight: 600 }}>{event?.title || 'Türkiye gündemi hareketli'}</div>
           <div style={{ fontSize: 11, color: '#556', marginTop: 2 }}>{event?.description || 'Toplumun nabzı anlık olarak ölçülüyor.'}</div>
         </div>
-        <div style={{ marginLeft: 'auto', fontSize: 10, color: '#888', whiteSpace: 'nowrap' }}>🕐 {liveTime}</div>
+        <div style={{ marginLeft: 'auto', fontSize: 10, color: '#888', whiteSpace: 'nowrap', animation: 'slideUp 0.3s ease-out' }}>🕐 {liveTime}</div>
       </div>
 
       {/* MAP */}
@@ -561,7 +560,7 @@ export default function Map({ results, event, onVoted, onlineCount }: MapProps) 
             </svg>
             <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 700 }}>81</div>
           </div>
-          <div style={{ fontSize: 7, color: '#888' }}>/81</div>
+          <div style={{ fontSize: 7, color: '#888' }}>{Object.keys(results?.byProvince || {}).length}/81</div>
         </div>
         <div style={{ background: '#0a0a0f', borderRadius: 10, padding: '8px 4px', textAlign: 'center', border: '.5px solid #1a2535' }}>
           <div style={{ fontSize: 7, color: '#888', textTransform: 'uppercase', marginBottom: 2 }}>Toplam Oy</div>
@@ -604,7 +603,16 @@ export default function Map({ results, event, onVoted, onlineCount }: MapProps) 
       {/* CTA */}
       {/* FIX #9: bottom: 0 yerine bottom: 60 — Bottom Nav'ın üzerinde durur */}
       <div style={{ padding: '0 14px 8px', position: 'sticky', bottom: 60, background: '#07090f' }}>
-        <button onClick={() => setShowShare(true)}
+        <button onClick={() => {
+          if (!selectedProvince) {
+            setShowCityError(true);
+              setTimeout(() => setShowCityError(false), 3000); // 3 saniye sonra kutu kaybolur
+                return;
+                }
+
+
+                      setShowShare(true)
+                      }}
           style={{ width: '100%', background: '#3a0010', border: 'none', borderRadius: 50, padding: '3px 16px', fontSize: 11, fontWeight: 400, color: '#fff', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4, textTransform: 'uppercase', letterSpacing: .5, boxShadow: '0 0 10px #ff0044, 0 0 25px #ff004499, 0 0 50px #ff004444', outline: '1.5px solid #ff0044' }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -674,15 +682,40 @@ export default function Map({ results, event, onVoted, onlineCount }: MapProps) 
       )}
 
       {voted && (
-        <div style={{ position: 'fixed', bottom: 80, left: '50%', transform: 'translateX(-50%)', background: '#57cc99', color: '#000', padding: '10px 20px', borderRadius: 20, fontWeight: 600, zIndex: 300, whiteSpace: 'nowrap' }}>
+        <div style={{ position: 'fixed', bottom: 80, left: '50%', transform: 'translateX(-50%)', background: '#57cc99', color: '#000', padding: '10px 20px', borderRadius: 20, fontWeight: 600, zIndex: 300, whiteSpace: 'nowrap', animation: 'slideUp 0.3s ease-out' }}>
           ✅ Duygun kaydedildi!
         </div>
       )}
+      {showCityError && (
+        <div style={{
+          position: 'fixed',
+          bottom: 140,
+          left: '50%',
+          transform: 'translateX(-50%)',
+          zIndex: 999,
+          background: '#1a0810',
+          border: '.5px solid #ff3b5c',
+          color: '#fff',
+          padding: '10px 18px',
+          borderRadius: 50,
+          fontSize: 12,
+          fontWeight: 600,
+          boxShadow: '0 0 12px #ff004466',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 6,
+          whiteSpace: 'nowrap',
+          animation: 'slideUp 0.3s ease-out'
+        }}>
+          📍 Lütfen haritadan bir il seçiniz
+        </div>
+      )}
+                                                                                
 
       <style>{`
         @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.15} }
         @keyframes mapBreathe { 0%,100%{opacity:1} 50%{opacity:0.5} }
-        @keyframes provincePulse { 0%,100%{stroke-width:2;stroke-opacity:0.9} 50%{stroke-width:4;stroke-opacity:0.5} }
+        @keyframes provincePulse { 0%,100%{stroke-width:2;stroke-opacity:0.9} 50%{stroke-width:4;stroke-opacity:0.5} } @keyframes slideUp { from { bottom: 40px; opacity: 0; } to { bottom: 90px; opacity: 1; } }
       `}</style>
     </div>
   )
