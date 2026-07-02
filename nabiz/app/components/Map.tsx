@@ -10,6 +10,7 @@ const supabase = createClient(
 )
 
 import * as d3 from 'd3'
+import ShareCard from './ShareCard'
 
 const EMOTIONS = ['öfkeli', 'karmaşık', 'umutlu', 'yorgun', 'sakin', 'mutlu', 'üzgün', 'kaygılı', 'korkmuş', 'heyecanlı', 'aşık', 'gururlu', 'hayal kırıklığı', 'nötr']
 const COLORS: Record<string, string> = {
@@ -289,6 +290,7 @@ export default function Map({ results, event, onVoted, onlineCount }: MapProps) 
   const mapRef = useRef<HTMLDivElement>(null)
   const feedRef = useRef<HTMLDivElement>(null)
   const [showShare, setShowShare] = useState(false)
+  const [showShareCard, setShowShareCard] = useState(false)
   const [selectedEmotion, setSelectedEmotion] = useState<string | null>(null)
   const [selectedProvince, setSelectedProvince] = useState<string | null>(null)
   const [voted, setVoted] = useState(false)
@@ -441,8 +443,8 @@ export default function Map({ results, event, onVoted, onlineCount }: MapProps) 
       }
 
       setVoted(true)
+      setShowShareCard(true)
       setShowShare(false)
-      setSelectedEmotion(null)
       onVoted()
       setTimeout(() => setVoted(false), 3000)
     } catch (err) {
@@ -710,6 +712,17 @@ export default function Map({ results, event, onVoted, onlineCount }: MapProps) 
             </button>
           </div>
         </div>
+      )}
+
+      {showShareCard && voted && (
+        <ShareCard
+          userProvince={selectedProvince || ''}
+          userEmotion={selectedEmotion || ''}
+          topEmotion={topEmotion}
+          topEmotionPct={total > 0 ? Math.round((byEmotion[topEmotion] || 0) / total * 100) : 0}
+          eventTitle={event?.title || ''}
+          onClose={() => setShowShareCard(false)}
+        />
       )}
 
       {voted && (
