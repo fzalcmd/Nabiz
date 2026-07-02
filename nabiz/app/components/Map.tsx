@@ -714,7 +714,7 @@ export default function Map({ results, event, onVoted, onlineCount }: MapProps) 
         </div>
       )}
 
-      {showShareCard && voted && (
+      {showShareCard && (
         <ShareCard
           userProvince={selectedProvince || ''}
           userEmotion={selectedEmotion || ''}
