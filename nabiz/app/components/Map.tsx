@@ -443,8 +443,8 @@ export default function Map({ results, event, onVoted, onlineCount }: MapProps) 
       }
 
       setVoted(true)
-      setShowShareCard(true)
       setShowShare(false)
+      setTimeout(() => setShowShareCard(true), 1000)
       onVoted()
       setTimeout(() => setVoted(false), 3000)
     } catch (err) {
