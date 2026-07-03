@@ -290,14 +290,15 @@ export default function Map({ results, event, onVoted, onlineCount }: MapProps) 
   
   // FIX #11: liveTime event.created_at'dan hesaplanıyor, secs'e bağlı değil
   const liveTime = (() => {
-    if (!event?.created_at) return '...'
-    if (!event?.created_at) {
-      return `${secs < 60 ? secs + 'sn' : secs < 3600 ? Math.floor(secs / 60) + 'dk' : Math.floor(secs / 3600) + 'sa'} önce`
-    }
-    const diff = Math.floor((Date.now() - new Date(event.created_at.replace('Z','') + 'Z').getTime()) / 1000)
-    if (diff < 60) return `${diff}sn önce`
-    if (diff < 3600) return `${Math.floor(diff / 60)}dk önce`
-    return `${Math.floor(diff / 3600)}sa önce`
+    try {
+      if (!event?.created_at) return '...'
+      const d = new Date(event.created_at)
+      if (isNaN(d.getTime())) return '...'
+      const diff = Math.floor((Date.now() - d.getTime()) / 1000)
+      if (diff < 60) return `${diff}sn önce`
+      if (diff < 3600) return `${Math.floor(diff / 60)}dk önce`
+      return `${Math.floor(diff / 3600)}sa önce`
+    } catch { return '...' }
   })()
   
   const EKG = "M0,8 L6,8 L8,2 L10,14 L12,4 L14,10 L16,8 L40,8"
