@@ -1,16 +1,60 @@
 'use client'
 
-import { useEffect, useRef, useState, useCallback } from 'react'
+import { useRef, useState, useCallback, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
 
-// FIX #16: supabase client modül seviyesinde bir kere oluşturuluyor
 const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
-
-import * as d3 from 'd3'
 import ShareCard from './ShareCard'
+import { useStaticMap, nn } from '../hooks/useStaticMap'
+
+function timeAgo(ts: string) {
+  const diff = Math.floor((Date.now() - new Date(ts + 'Z').getTime()) / 1000)
+  if (diff < 10) return 'az önce'
+  if (diff < 60) return `${diff} sn önce`
+  if (diff < 3600) return `${Math.floor(diff / 60)} dk önce`
+  return `${Math.floor(diff / 3600)} sa önce`
+}
+
+interface VoteData {
+  province: string
+  emotion: string
+  eventId: string
+  dev?: string
+}
+
+interface EventData {
+  id: string
+  title: string
+  description: string
+  created_at: string
+}
+
+interface ResultsData {
+  byProvince: Record<string, Record<string, number>>
+  byEmotion: Record<string, number>
+  total: number
+  topProvince: string
+  topProvinceCount: number
+}
+
+interface FeedItem {
+  c: string
+  e: string
+  t: string
+}
+
+interface MapProps {
+  results: ResultsData
+  event: EventData
+  onVoted: () => void
+  onlineCount: number
+}
+import { useColorUpdate } from '../hooks/useColorUpdate'
+import { useFeed } from '../hooks/useFeed'
+
 
 const EMOTIONS = ['öfkeli', 'karmaşık', 'umutlu', 'yorgun', 'sakin', 'mutlu', 'üzgün', 'kaygılı', 'korkmuş', 'heyecanlı', 'aşık', 'gururlu', 'hayal kırıklığı', 'nötr']
 const COLORS: Record<string, string> = {
@@ -38,224 +82,6 @@ const BIG_CITIES: Record<string, { label: string, val: string }> = {
 }
 
 // FIX #4: Turkish normalization — tutarlı string normalizasyonu
-function nn(s: string) {
-  return (s || '')
-    .toLowerCase()
-    .replace(/i̇/g, 'i')
-    .replace(/ğ/g, 'g')
-    .replace(/ü/g, 'u')
-    .replace(/ş/g, 's')
-    .replace(/ö/g, 'o')
-    .replace(/ç/g, 'c')
-    .replace(/ı/g, 'i')
-    .trim()
-}
-
-// ── KATMAN 1: Statik harita — sadece bir kere çizilir ──
-function useStaticMap(mapRef: React.RefObject<HTMLDivElement | null>, onProvinceClick: (name: string) => void) {
-  const drawn = useRef(false)
-  const pathsRef = useRef<Record<string, SVGPathElement>>({})
-  const orbsRef = useRef<Record<string, SVGCircleElement[]>>({})
-  // FIX #14: animActiveRef cleanup için kullanılacak
-  const animActiveRef = useRef(true)
-  // FIX #2: stale closure sorunu — callback her zaman güncel ref üzerinden çağrılır
-  const onClickRef = useRef(onProvinceClick)
-  useEffect(() => { onClickRef.current = onProvinceClick }, [onProvinceClick])
-
-  useEffect(() => {
-    if (drawn.current || !mapRef.current) return
-    drawn.current = true
-
-    async function draw() {
-      const geo = await d3.json('/tr-cities.json') as any
-      const wrap = mapRef.current!
-      wrap.innerHTML = ''
-      const W = wrap.clientWidth || 360
-      const H = Math.round(W * 0.54)
-
-      const svg = d3.select(wrap).append('svg')
-        .attr('viewBox', `0 0 ${W} ${H}`)
-        .attr('width', W).attr('height', H)
-
-      const defs = svg.append('defs')
-
-      const bg = defs.append('radialGradient').attr('id', 'bgG').attr('cx', '40%').attr('cy', '50%').attr('r', '70%')
-      bg.append('stop').attr('offset', '0%').attr('stop-color', '#050505')
-      bg.append('stop').attr('offset', '60%').attr('stop-color', '#030303')
-      bg.append('stop').attr('offset', '100%').attr('stop-color', '#030303')
-      svg.append('rect').attr('width', W).attr('height', H).attr('fill', 'url(#bgG)')
-
-      defs.append('filter').attr('id', 'bGlow').attr('x', '-20%').attr('y', '-20%').attr('width', '140%').attr('height', '140%')
-        .html('<feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>')
-
-      defs.append('filter').attr('id', 'oGlow').attr('x', '-100%').attr('y', '-100%').attr('width', '300%').attr('height', '300%')
-        .html('<feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>')
-
-      defs.append('filter').attr('id', 'bigGlow').attr('x', '-150%').attr('y', '-150%').attr('width', '400%').attr('height', '400%')
-        .html('<feGaussianBlur stdDeviation="10" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>')
-
-      EMOTIONS.forEach(em => {
-        const rg = defs.append('radialGradient').attr('id', `grad_${em}`).attr('cx', '35%').attr('cy', '30%').attr('r', '65%')
-        rg.append('stop').attr('offset', '0%').attr('stop-color', '#fff').attr('stop-opacity', '.9')
-        rg.append('stop').attr('offset', '40%').attr('stop-color', COLORS[em]).attr('stop-opacity', '1')
-        rg.append('stop').attr('offset', '100%').attr('stop-color', COLORS[em]).attr('stop-opacity', '.4')
-      })
-
-      const proj = d3.geoMercator().fitSize([W, H], geo)
-      const path = d3.geoPath().projection(proj)
-
-      svg.selectAll('.province')
-        .data(geo.features).enter().append('path')
-        .attr('class', 'province')
-        .attr('d', path as any)
-        .attr('fill', '#000')
-        .attr('stroke', '#00cfff')
-        .attr('stroke-opacity', '0.85')
-        .attr('stroke-width', '0.5')
-        .attr('filter', 'url(#bGlow)')
-        .attr('data-name', (d: any) => d.properties?.name || d.properties?.NAME || d.properties?.il_adi || '')
-        .on('click', function(_e: any, d: any) {
-          const n = (d as any).properties?.name || (d as any).properties?.NAME || (d as any).properties?.il_adi || ''
-          // FIX #2: stale closure yerine ref üzerinden çağır
-          onClickRef.current(n)
-        })
-        .each(function(d: any) {
-          const n = (d as any).properties?.name || (d as any).properties?.NAME || (d as any).properties?.il_adi || ''
-          pathsRef.current[nn(n)] = this as SVGPathElement
-        })
-
-      geo.features.forEach((d: any) => {
-        const p = d.properties || {}
-        const n = p.name || p.NAME || p.il_adi || ''
-        const k = nn(n)
-        const isBig = !!BIG_CITIES[k]
-
-        let c: [number, number]
-        try { c = path.centroid(d as any) as [number, number] } catch { return }
-        if (!c || isNaN(c[0]) || isNaN(c[1])) return
-
-        const area = path.area(d as any)
-        const r = Math.max(2, Math.min(4.5, Math.sqrt(area) * 0.038))
-
-        if (isBig) {
-          const rip = svg.append('circle')
-            .attr('cx', c[0]).attr('cy', c[1]).attr('r', r)
-            .attr('fill', 'none').attr('stroke', '#ff3b5c')
-            .attr('stroke-width', '0.8').attr('opacity', '0')
-            .attr('data-rip', k)
-            .style('pointer-events', 'none')
-
-          const delay = Math.random() * 1500
-
-          function animRip() {
-            // FIX #14: animActiveRef false olunca animasyon durur
-            if (!animActiveRef.current) return
-            rip.attr('r', r).attr('opacity', '.5')
-            rip.transition().delay(delay).duration(2500).ease(d3.easeCubicOut)
-              .attr('r', r * 4).attr('opacity', '0')
-              .on('end', () => { if (animActiveRef.current) setTimeout(animRip, 500) })
-          }
-          animRip()
-        }
-
-        const orb = svg.append('circle')
-          .attr('cx', c[0]).attr('cy', c[1]).attr('r', r)
-          .attr('fill', 'url(#grad_nötr)')
-          .attr('filter', isBig ? 'url(#bigGlow)' : 'url(#oGlow)')
-          .attr('data-orb', k)
-          .style('pointer-events', 'none')
-
-        orbsRef.current[k] = [...(orbsRef.current[k] || []), orb.node() as SVGCircleElement]
-
-        if (isBig) {
-          (orb as any).__baseR = r
-        }
-
-        // FIX #13: boş text elementi kaldırıldı
-      })
-    }
-
-    draw()
-
-    // FIX #14: cleanup — animasyon unmount'ta durdurulur
-    return () => { animActiveRef.current = false }
-  }, [])
-
-  return { pathsRef, orbsRef }
-}
-
-// ── KATMAN 2: Renk güncellemesi — haritayı yeniden çizmez ──
-function useColorUpdate(
-  orbsRef: React.RefObject<Record<string, SVGCircleElement[]>>,
-  pathsRef: React.RefObject<Record<string, SVGPathElement>>,
-  byProvince: Record<string, any>,
-  // FIX #3: seçili il bilgisi burada da alınıyor, highlight üzerine yazmasın diye
-  selectedProvince: string | null
-) {
-  useEffect(() => {
-    Object.entries(orbsRef.current).forEach(([k, elements]) => {
-      const provName = Object.keys(byProvince).find(n => nn(n) === k)
-      const byProv = provName ? (byProvince[provName] || {}) : {}
-      const totalVotes = (Object.values(byProv) as number[]).reduce((a, b) => a + b, 0)
-      const topEm = Object.keys(byProv).length > 0
-        ? Object.keys(byProv).reduce((a, b) => byProv[a] > byProv[b] ? a : byProv[a] === byProv[b] ? (EMOTIONS.indexOf(a) <= EMOTIONS.indexOf(b) ? a : b) : b)
-        : null
-
-      elements.forEach((el) => {
-        if (topEm) {
-          el.setAttribute('fill', 'url(#grad_' + String(topEm) + ')')
-          const glowId = totalVotes > 20 ? 'bigGlow' : totalVotes > 5 ? 'oGlow' : 'bGlow'
-          el.setAttribute('filter', 'url(#' + String(glowId) + ')')
-        }
-      })
-
-      const isSelectedProvince = typeof window !== "undefined" && (window as any).__selectedProvince === k
-      const pathEl = pathsRef.current?.[k]
-      if (pathEl) {
-        // FIX #3: seçili ilin stroke'unu useColorUpdate ezmesin
-        const isSelected = selectedProvince && k === nn(selectedProvince)
-
-        if (topEm) {
-          const opacity = totalVotes >= 50 ? 0.35 : totalVotes >= 20 ? 0.25 : totalVotes >= 5 ? 0.15 : 0.08
-          pathEl.setAttribute('fill', COLORS[topEm])
-          pathEl.setAttribute('fill-opacity', String(opacity))
-          if (!isSelected) {
-            pathEl.setAttribute('stroke', COLORS[topEm])
-            pathEl.setAttribute('stroke-opacity', '0.9')
-            pathEl.setAttribute('stroke-width', totalVotes > 20 ? '1.2' : '0.7')
-          }
-        } else {
-          pathEl.setAttribute('fill', '#000')
-          pathEl.setAttribute('fill-opacity', '1')
-          if (!isSelected) {
-            pathEl.setAttribute('stroke', '#1E90FF')
-            pathEl.setAttribute('stroke-opacity', '0.5')
-            pathEl.setAttribute('stroke-width', '0.5')
-            pathEl.style.animation = ''
-          }
-        }
-      }
-    })
-  }, [pathsRef, orbsRef, byProvince, selectedProvince])
-}
-
-// FIX #8: "önce" kelimesi timeAgo içinde — dışarıda tekrar yazılmayacak
-function timeAgo(ts: string) {
-  const diff = Math.floor((Date.now() - new Date(ts + 'Z').getTime()) / 1000)
-  if (diff < 10) return 'az önce'
-  if (diff < 60) return `${diff} sn önce`
-  if (diff < 3600) return `${Math.floor(diff / 60)} dk önce`
-  return `${Math.floor(diff / 3600)} sa önce`
-}
-
-// FIX #9: Props type definitions — type safety
-interface VoteData {
-  province: string
-  emotion: string
-  eventId: string
-  dev?: string
-}
-
 interface EventData {
   id: string
   title: string
@@ -446,7 +272,7 @@ export default function Map({ results, event, onVoted, onlineCount }: MapProps) 
       setShowShare(false)
       setTimeout(() => setShowShareCard(true), 1000)
       onVoted()
-      setTimeout(() => setVoted(false), 3000)
+      setTimeout(() => setVoted(false), 1000)
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Bağlantı hatası, lütfen tekrar dene.'
       console.error('Vote error:', err)

@@ -114,7 +114,7 @@ export default function ShareCard({
           <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
           X'te Paylaş
         </a>
-        <button onClick={onClose} style={{ width: '100%', marginTop: 8, background: 'transparent', border: 'none', color: '#445', fontSize: 12, cursor: 'pointer', padding: '6px 0' }}>Kapat</button>
+        <button onClick={onClose} style={{ width: '100%', marginTop: 8, background: 'transparent', border: '0.5px solid #333', borderRadius: 20, color: '#aaa', fontSize: 12, cursor: 'pointer', padding: '8px 0' }}>Kapat</button>
       </div>
     </div>
   )
