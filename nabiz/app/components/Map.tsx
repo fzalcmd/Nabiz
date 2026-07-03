@@ -11,7 +11,8 @@ import ShareCard from './ShareCard'
 import { useStaticMap, nn } from '../hooks/useStaticMap'
 
 function timeAgo(ts: string) {
-  const diff = Math.floor((Date.now() - new Date(ts + 'Z').getTime()) / 1000)
+  const ts2 = ts.endsWith('Z') ? ts : ts + 'Z'
+  const diff = Math.floor((Date.now() - new Date(ts2).getTime()) / 1000)
   if (diff < 10) return 'az önce'
   if (diff < 60) return `${diff} sn önce`
   if (diff < 3600) return `${Math.floor(diff / 60)} dk önce`
