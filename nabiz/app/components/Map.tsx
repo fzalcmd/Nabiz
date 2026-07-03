@@ -290,6 +290,7 @@ export default function Map({ results, event, onVoted, onlineCount }: MapProps) 
   
   // FIX #11: liveTime event.created_at'dan hesaplanıyor, secs'e bağlı değil
   const liveTime = (() => {
+    if (!event?.created_at) return '...'
     if (!event?.created_at) {
       return `${secs < 60 ? secs + 'sn' : secs < 3600 ? Math.floor(secs / 60) + 'dk' : Math.floor(secs / 3600) + 'sa'} önce`
     }
