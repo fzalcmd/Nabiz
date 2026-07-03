@@ -293,7 +293,7 @@ export default function Map({ results, event, onVoted, onlineCount }: MapProps) 
     if (!event?.created_at) {
       return `${secs < 60 ? secs + 'sn' : secs < 3600 ? Math.floor(secs / 60) + 'dk' : Math.floor(secs / 3600) + 'sa'} önce`
     }
-    const diff = Math.floor((Date.now() - new Date(event.created_at.endsWith('Z') ? event.created_at : event.created_at + 'Z').getTime()) / 1000)
+    const diff = Math.floor((Date.now() - new Date(event.created_at.replace('Z','') + 'Z').getTime()) / 1000)
     if (diff < 60) return `${diff}sn önce`
     if (diff < 3600) return `${Math.floor(diff / 60)}dk önce`
     return `${Math.floor(diff / 3600)}sa önce`
